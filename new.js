@@ -5,30 +5,32 @@ function generateQR() {
   const fgColor = document.getElementById("fgColor").value;
   const bgColor = document.getElementById("bgColor").value;
   const style = document.getElementById("style").value;
+  const cornerSquare = document.getElementById("cornerSquare").value;
+  const cornerDot = document.getElementById("cornerDot").value;
 
   const options = {
     width: 250,
     height: 250,
     type: "svg",
     data: qrText,
-    image: "",
     dotsOptions: {
       color: fgColor,
-      type: style
+      type: style,
     },
     backgroundOptions: {
       color: bgColor,
-    }
+    },
+    cornersSquareOptions: {
+      type: cornerSquare,
+      color: fgColor,
+    },
+    cornersDotOptions: {
+      type: cornerDot,
+      color: fgColor,
+    },
   };
 
-  // Remove existing QR
   document.getElementById("qrcode").innerHTML = "";
-
   qrCode = new QRCodeStyling(options);
   qrCode.append(document.getElementById("qrcode"));
-}
-
-function downloadQR(type) {
-  if (!qrCode) return;
-  qrCode.download({ extension: type });
 }
