@@ -30,7 +30,26 @@ function generateQR() {
     },
   };
 
+  // Clear previous QR
   document.getElementById("qrcode").innerHTML = "";
+
+  // Recreate QRCode instance
   qrCode = new QRCodeStyling(options);
   qrCode.append(document.getElementById("qrcode"));
+}
+
+// DOWNLOAD FUNCTION
+function downloadQR(type) {
+  if (!qrCode) {
+    alert("Please generate a QR code first.");
+    return;
+  }
+
+  const fileName = "rasty-qr-code";
+
+  // Use .download() method of QRCodeStyling
+  qrCode.download({
+    name: fileName,
+    extension: type
+  });
 }
