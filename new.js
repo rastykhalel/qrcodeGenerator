@@ -47,9 +47,30 @@ function downloadQR(type) {
 
   const fileName = "rasty-qr-code";
 
-  // Use .download() method of QRCodeStyling
-  qrCode.download({
-    name: fileName,
-    extension: type
-  });
+  if (type === "pdf") {
+    qrCode.getRawData("png").then(async (blob) => {
+      const reader = new FileReader();
+      reader.onload = async function () {
+        const imageDataUrl = reader.result;
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF();
+
+        // Adjust image size and position as needed
+        const imgProps = pdf.getImageProperties(imageDataUrl);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+        pdf.addImage(imageDataUrl, "PNG", 10, 10, pdfWidth - 20, pdfHeight);
+        pdf.save(`${fileName}.pdf`);
+      };
+      reader.readAsDataURL(blob);
+    });
+  } else {
+    qrCode.download({
+      name: fileName,
+      extension: type
+    });
+  }
 }
+
