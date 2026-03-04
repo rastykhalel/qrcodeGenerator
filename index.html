@@ -9,11 +9,11 @@
 
   <style>
     :root {
-      --primary: #4F46E5;
+      --primary: #0F20ED;
       --primary-hover: #4338CA;
       --bg-color: #F3F4F6;
       --card-bg: #FFFFFF;
-      --text-main: #1F2937;
+      --text-main: #0F20ED;
       --text-muted: #6B7280;
       --border: #E5E7EB;
       --radius: 12px;
@@ -48,9 +48,37 @@
     }
 
     .header {
-      background: linear-gradient(135deg, var(--primary), #8B5CF6);
-      color: white;
+      /* header background uses primary color variable, which will be updated
+         based on the cover image on load */
+      background-color: var(--primary);
+      color: var(--text-main);
       padding: 24px;
+      text-align: center;
+    }
+
+    .header img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .header-image-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    .header-caption {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.5);
+      color: white;
+      padding: 6px 12px;
+      font-size: 1rem;
+      border-radius: 0 0 8px 8px;
+      width: calc(100% - 20px);
       text-align: center;
     }
 
@@ -253,7 +281,12 @@
 
   <div class="container">
     <div class="header">
-      <h1>🎨 Rasty QR Code Generator</h1>
+      <!-- container for image with caption overlay -->
+      <div class="header-image-wrapper">
+        <img id="headerLogo" src="cover-behance.png" alt="Rasty QR Code Generator" />
+       
+        <div class="">Rasty QR Code Generator - create custom QR codes instantly</div>
+      </div>
     </div>
 
     <div class="content-wrapper">
@@ -320,7 +353,7 @@
           <div class="row" style="margin-top: 5px;">
             <div class="form-group color-picker">
               <label for="fgColor">QR Color:</label>
-              <input type="color" id="fgColor" value="#4F46E5" />
+              <input type="color" id="fgColor" value="#0F20ED" />
             </div>
             <div class="form-group color-picker">
               <label for="bgColor">Background:</label>
@@ -352,7 +385,46 @@
   <script>
     let uploadedLogoUrl = "";
 
-    // Initialize QR Code Styling instance
+    // when the cover image loads, sample its colors and update the CSS variables
+    function applyImageColors(img) {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+        let r = 0, g = 0, b = 0, count = 0;
+        for (let i = 0; i < data.length; i += 4) {
+          r += data[i];
+          g += data[i + 1];
+          b += data[i + 2];
+          count++;
+        }
+        r = Math.round(r / count);
+        g = Math.round(g / count);
+        b = Math.round(b / count);
+        const avg = `rgb(${r},${g},${b})`;
+        document.documentElement.style.setProperty('--primary', avg);
+        // darken the hover version a little
+        document.documentElement.style.setProperty('--primary-hover', `rgb(${Math.max(r-30,0)},${Math.max(g-30,0)},${Math.max(b-30,0)})`);
+        // choose readable text color based on brightness
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        const textColor = brightness > 128 ? '#0F20ED' /* dark text */ : '#ffffff';
+        document.documentElement.style.setProperty('--text-main', textColor);
+      } catch (e) {
+        console.warn('Could not extract colors from header image', e);
+      }
+    }
+
+    const headerImg = document.getElementById('headerLogo');
+    if (headerImg) {
+      if (headerImg.complete) {
+        applyImageColors(headerImg);
+      } else {
+        headerImg.onload = () => applyImageColors(headerImg);
+      }
+    }
     const qrCode = new QRCodeStyling({
       width: 300,
       height: 300,
