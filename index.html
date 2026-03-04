@@ -250,6 +250,15 @@
       overflow: hidden;
     }
 
+    /* ensure the generated QR (canvas/svg) scales down on small screens
+       instead of expanding the page layout */
+    .qrcode-wrapper svg,
+    .qrcode-wrapper canvas {
+      width: 100% !important;
+      height: auto !important;
+      max-width: 400px; /* prevent it becoming gigantic on desktop */
+    }
+
     .download-buttons {
       display: flex;
       gap: 10px;
@@ -496,6 +505,12 @@
 
     // Trigger on first load
     generateQR();
+
+    // on window resize, reapply the current size so the library can
+    // re-render at the proper resolution (CSS will handle shrinking)
+    window.addEventListener('resize', () => {
+      generateQR();
+    });
 
     // Function to handle downloads
     async function downloadQR(type) {
